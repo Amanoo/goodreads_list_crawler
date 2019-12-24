@@ -1,7 +1,8 @@
 # goodreads_list_crawler
 Depends on beautifulsoup4, lxml, and goodreads. Use pip (or pip3) to install.
 
-```pip3 install beautifulsoup4
+```
+pip3 install beautifulsoup4
 pip3 install lxml
 pip3 install goodreads
 ```
