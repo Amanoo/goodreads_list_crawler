@@ -89,18 +89,14 @@ def generate_list(localsoup):
     for tr in table_rows:
         exceptcount=4
         while exceptcount > 0:
-            try:
+            try:    #sometimes this crashes for no reason, so we retry a few times if this is the case.
                 goodreads_id=tr.find('div',class_='u-anchorTarget')['id']
-                #name=tr.find('a',class_="bookTitle").find('span').text
                 author=tr.find('a',class_="authorName").find('span',itemprop="name").text
 
-                #ratingtext=re.sub(r'([a-zA-Z,])','',tr.find('span', class_="minirating").text).split("—")
-                #rating=float(ratingtext[0])
-                #ratingcount=int(ratingtext[1])
                 print(goodreads_id)
                 book=gc.book(goodreads_id)
+
                 name=book.title
-                #author=book.authors()
                 rating=book.average_rating
                 ratingcount=book.ratings_count
                 ratingdist=book.rating_dist
@@ -108,37 +104,43 @@ def generate_list(localsoup):
                 date=str(book.publication_date[2])+"-"+str(book.publication_date[0])+"-"+str(book.publication_date[1])
 
                 entry=(goodreads_id,name,author,rating,ratingcount,ratingdist,text_reviews,date)
-                add_fantasy_entry(connextion,entry)
+
+                #gotta check if we really are dealing with fantasy
+                isFantasy=False
+                shelves=book.popular_shelves
+                for shelf in shelves:
+                    if shelf.name == 'fantasy':
+                        isFantasy=True
+                        break
+
+                if isFantasy:
+                   add_fantasy_entry(connextion,entry)
                 exceptcount=0
             except GoodreadsRequestException:
                 exceptcount=exceptcount-1
                 print("encountered goodreadsexception")
+                if exceptcount == 0:
+                    print("skipping book")
                 time.sleep(3)
 
 
-
-        #print(entry)
-
-
 def parse_list(url):
-    print("\t"+url)
-
-    sauce = urllib.request.urlopen(url).read()
-    soup = bs.BeautifulSoup(sauce,'lxml')
-    pagecount= find_pagecount(soup)
-    generate_list(soup)
-
-    for x in range(2,pagecount+1):
+    pagecount= 1
+    x=1
+    while x <= pagecount:
         newUrl=url+"?page="+str(x)
         print("\t"+newUrl)
         sauce = urllib.request.urlopen(newUrl).read()
         soup = bs.BeautifulSoup(sauce,'lxml')
+        if x == 1:
+            pagecount= find_pagecount(soup)
         generate_list(soup)
         connextion.commit() #commit once per page, don't want too many writes on our file system
+        x += 1
     
 
-
-filepath = 'fantasylists'
+filepath = 'fantasytest.txt'
+#filepath = 'fantasylists.txt'
 with open(filepath) as fp:
     line = fp.readline().replace('\n','')
     cnt = 1
