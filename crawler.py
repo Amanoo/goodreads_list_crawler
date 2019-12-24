@@ -139,8 +139,8 @@ def parse_list(url):
         x += 1
     
 
-filepath = 'fantasytest.txt'
-#filepath = 'fantasylists.txt'
+#filepath = 'fantasytest.txt'
+filepath = 'fantasylists.txt'
 with open(filepath) as fp:
     line = fp.readline().replace('\n','')
     cnt = 1
