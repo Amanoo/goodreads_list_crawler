@@ -44,7 +44,7 @@ def add_fantasy_entry(conn, entry):
     :return:
     """
  
-    sql = ''' INSERT INTO books(goodreads_id,book_title,author,rating,number_of_ratings)
+    sql = ''' INSERT OR IGNORE INTO books(goodreads_id,book_title,author,rating,number_of_ratings)
               VALUES(?,?,?,?,?) '''
     cur = conn.cursor()
     cur.execute(sql, entry)
@@ -108,7 +108,7 @@ def parse_list(url):
     
 
 
-filepath = 'fantasylist'
+filepath = 'fantasylists'
 with open(filepath) as fp:
     line = fp.readline().replace('\n','')
     cnt = 1
