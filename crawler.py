@@ -2,10 +2,13 @@ import bs4 as bs
 import urllib.request
 import string
 import re
+from goodreads import client
 
 
 import sqlite3
 from sqlite3 import Error
+
+gc = client.GoodreadsClient("f4YcFGIKNiejrGv59xXQ", "WO8By9ua8KPF9x9c9PiPaAhYSwzGjhqB0JEVgos")
 
 
 def create_connection(db_file):
@@ -44,8 +47,8 @@ def add_fantasy_entry(conn, entry):
     :return:
     """
  
-    sql = ''' INSERT OR IGNORE INTO books(goodreads_id,book_title,author,rating,number_of_ratings)
-              VALUES(?,?,?,?,?) '''
+    sql = ''' INSERT OR IGNORE INTO books(goodreads_id,book_title,author,rating,number_of_ratings,rating_distribution,text_reviews,pub_date)
+              VALUES(?,?,?,?,?,?,?,?) '''
     cur = conn.cursor()
     cur.execute(sql, entry)
     return cur.lastrowid
@@ -56,7 +59,10 @@ sql_create_table = """ CREATE TABLE IF NOT EXISTS books (
                                     book_title text NOT NULL,
                                     author text,
                                     rating float,
-                                    number_of_ratings integer
+                                    number_of_ratings integer,
+                                    rating_distribution integer,
+                                    text_reviews integer,
+                                    pub_date datetime
                                 ); """
 connextion = create_connection(database)
 create_table(connextion, sql_create_table)
@@ -78,14 +84,23 @@ def generate_list(localsoup):
     table_rows=table.find_all('tr')
     for tr in table_rows:
         goodreads_id=tr.find('div',class_='u-anchorTarget')['id']
-        name=tr.find('a',class_="bookTitle").find('span').text
+        #name=tr.find('a',class_="bookTitle").find('span').text
         author=tr.find('a',class_="authorName").find('span',itemprop="name").text
 
-        ratingtext=re.sub(r'([a-zA-Z,])','',tr.find('span', class_="minirating").text).split("—")
-        rating=float(ratingtext[0])
-        ratingcount=int(ratingtext[1])
+        #ratingtext=re.sub(r'([a-zA-Z,])','',tr.find('span', class_="minirating").text).split("—")
+        #rating=float(ratingtext[0])
+        #ratingcount=int(ratingtext[1])
 
-        entry=(goodreads_id,name,author,rating,ratingcount)
+        book=gc.book(goodreads_id)
+        name=book.title
+        #author=book.authors()
+        rating=book.average_rating
+        ratingcount=book.ratings_count
+        ratingdist=book.rating_dist
+        text_reviews=book.text_reviews_count
+        date=str(book.publication_date[2])+"-"+str(book.publication_date[0])+"-"+str(book.publication_date[1])
+
+        entry=(goodreads_id,name,author,rating,ratingcount,ratingdist,text_reviews,date)
         add_fantasy_entry(connextion,entry)
 
         #print(entry)
