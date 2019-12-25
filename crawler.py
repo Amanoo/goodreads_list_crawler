@@ -132,7 +132,15 @@ def parse_list(url):
     while x <= pagecount:
         newUrl=url+"?page="+str(x)
         print("\t"+newUrl)
-        sauce = urllib.request.urlopen(newUrl).read()
+        connectionTries=15
+        while connectionTries>0: #sometimes goodreads is shitty and doesn't want to connect
+            try:
+                sauce = urllib.request.urlopen(newUrl).read()
+                connectionTries=0
+            except:
+                print("failed to connect")
+                connectionTries=connectionTries-1
+                time.sleep(10)
         soup = bs.BeautifulSoup(sauce,'lxml')
         if x == 1:
             pagecount= find_pagecount(soup)
