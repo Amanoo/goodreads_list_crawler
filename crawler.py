@@ -111,9 +111,12 @@ def generate_list(localsoup):
 
                 if len(shelves)>0: #don't process this book if it doesn't have any shelves
                     for shelf in shelves:
-                        if shelf.name == 'fantasy':
-                            isFantasy=True
-                            break
+                        try:
+                            if shelf.name == 'fantasy':
+                                isFantasy=True
+                                break
+                        except:
+                            print("Couldn't find a genre. Skipping")
 
                 if isFantasy:
                    add_fantasy_entry(connextion,entry)
