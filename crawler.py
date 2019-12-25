@@ -148,5 +148,3 @@ with open(filepath) as fp:
         parse_list(line)
         line = fp.readline().replace('\n','')
         cnt += 1
-
-
