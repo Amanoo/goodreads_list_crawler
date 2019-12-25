@@ -108,10 +108,12 @@ def generate_list(localsoup):
                 #gotta check if we really are dealing with fantasy
                 isFantasy=False
                 shelves=book.popular_shelves
-                for shelf in shelves:
-                    if shelf.name == 'fantasy':
-                        isFantasy=True
-                        break
+
+                if len(shelves)>0: #don't process this book if it doesn't have any shelves
+                    for shelf in shelves:
+                        if shelf.name == 'fantasy':
+                            isFantasy=True
+                            break
 
                 if isFantasy:
                    add_fantasy_entry(connextion,entry)
